@@ -64,10 +64,10 @@ def renew_comb(comb: list[str], auth_folder: str = "./.auth") -> None:
     browser = playwright.chromium.launch(headless=HEADLESS)
     context = browser.new_context()
     page = context.new_page()
-
     if "shopping" in comb:
         username = ACCOUNTS["shopping"]["username"]
         password = ACCOUNTS["shopping"]["password"]
+        print(f"{SHOPPING}/customer/account/login/")
         page.goto(f"{SHOPPING}/customer/account/login/")
         page.get_by_label("Email", exact=True).fill(username)
         page.get_by_label("Password", exact=True).fill(password)
@@ -98,6 +98,8 @@ def renew_comb(comb: list[str], auth_folder: str = "./.auth") -> None:
         page.get_by_test_id("username-field").press("Tab")
         page.get_by_test_id("password-field").fill(password)
         page.get_by_test_id("sign-in-button").click()
+
+    print('done')
 
     context.storage_state(path=f"{auth_folder}/{'.'.join(comb)}_state.json")
 

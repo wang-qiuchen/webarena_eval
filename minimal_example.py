@@ -9,27 +9,61 @@ import time
 
 SLEEP = 1.5
 # set the URLs of each website, we use the demo sites as an example
+# os.environ[
+#     "SHOPPING"
+# ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:7770"
+# os.environ[
+#     "SHOPPING_ADMIN"
+# ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:7780/admin"
+# os.environ[
+#     "REDDIT"
+# ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:9999"
+# os.environ[
+#     "GITLAB"
+# ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:8023"
+# os.environ[
+#     "MAP"
+# ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:3000"
+# os.environ[
+#     "WIKIPEDIA"
+# ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:8888/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
+# os.environ[
+#     "HOMEPAGE"
+# ] = "PASS"  # The home page is not currently hosted in the demo site
+
+
+
+
 os.environ[
     "SHOPPING"
-] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:7770"
+] = "http://10.122.23.23:7770"
 os.environ[
     "SHOPPING_ADMIN"
-] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:7780/admin"
+] = "http://10.122.23.23:7780/admin"
 os.environ[
     "REDDIT"
-] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:9999"
+] = "http://10.122.23.23:9999"
 os.environ[
     "GITLAB"
-] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:8023"
+] = "http://10.122.23.23:8023"
+# os.environ[
+#     "GITLAB"
+# ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:8023"
 os.environ[
     "MAP"
 ] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:3000"
 os.environ[
     "WIKIPEDIA"
-] = "http://ec2-3-131-244-37.us-east-2.compute.amazonaws.com:8888/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
+] = "http://10.122.23.23:8888/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
 os.environ[
     "HOMEPAGE"
-] = "PASS"  # The home page is not currently hosted in the demo site
+] = "http://10.122.23.23:4399"  # The home page is not currently hosted in the demo site
+
+
+
+
+
+
 print("Done setting up URLs")
 
 # First, run `python scripts/generate_test_data.py` to generate the config files
@@ -70,7 +104,7 @@ from evaluation_harness.evaluators import evaluator_router
 
 # Init the environment
 env = ScriptBrowserEnv(
-    headless=False,
+    headless=True,
     slow_mo=100,
     observation_type="accessibility_tree",
     current_viewport_only=True,
@@ -114,7 +148,10 @@ click_action = create_id_based_action(f"click [{match}]")
 trajectory.append(click_action)
 
 # Step and get the new observation
+
 obs, _, terminated, _, info = env.step(click_action)
+
+import pdb;pdb.set_trace()
 # New observation
 actree_obs = obs["text"]
 print(actree_obs)
@@ -134,19 +171,14 @@ print(actree_obs)
 time.sleep(SLEEP)
 state_info = {"observation": obs, "info": info}
 trajectory.append(state_info)
-
 # add a stop action to mark the end of the trajectory
 trajectory.append(create_stop_action(""))
 
 
 # Demo evaluation
 evaluator = evaluator_router(config_file)
-score = evaluator(
-    trajectory=trajectory,
-    config_file=config_file,
-    page=env.page,
-    client=env.get_page_client(env.page),
-)
+score = evaluator(trajectory=trajectory,config_file=config_file, page=env.page,client=env.get_page_client(env.page),)
 
+print(score)
 # as we manually perform the task, the task should be judged as correct
 assert score == 1.0
